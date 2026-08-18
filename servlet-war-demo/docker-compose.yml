@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: servlet-war-demo-postgres
+    environment:
+      POSTGRES_DB: servlet_demo
+      POSTGRES_USER: servlet_user
+      POSTGRES_PASSWORD: servlet_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U servlet_user -d servlet_demo"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:

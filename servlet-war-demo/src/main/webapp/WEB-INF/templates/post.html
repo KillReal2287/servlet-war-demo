@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${post.title}">Пост</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f6f8fa;
+            color: #1f2328;
+        }
+
+        .post-page {
+            box-sizing: border-box;
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 32px 20px;
+        }
+
+        .post-card {
+            background: #ffffff;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 28px;
+            box-shadow: 0 8px 24px rgba(140, 149, 159, 0.18);
+            overflow: hidden;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 18px;
+            color: #0969da;
+            text-decoration: none;
+        }
+
+        h1 {
+            margin: 0 0 16px;
+            line-height: 1.2;
+            overflow-wrap: anywhere;
+        }
+
+        .post-image {
+            width: 100%;
+            max-height: 460px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin: 16px 0;
+        }
+
+        .meta,
+        .actions,
+        .tags {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .meta {
+            color: #57606a;
+            margin: 12px 0;
+        }
+
+        .tag {
+            border: 1px solid #d0d7de;
+            border-radius: 999px;
+            padding: 3px 8px;
+            color: #0969da;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .paragraphs p {
+            line-height: 1.6;
+            margin: 0 0 14px;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .actions,
+        .comments {
+            margin-top: 22px;
+        }
+
+        input,
+        button {
+            padding: 8px 12px;
+        }
+
+        .comment-form input {
+            box-sizing: border-box;
+            min-width: 360px;
+            max-width: 100%;
+        }
+
+        .comment {
+            border-top: 1px solid #d0d7de;
+            padding: 12px 0;
+        }
+
+        .comment p {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        @media (max-width: 640px) {
+            .post-page {
+                padding: 18px 12px;
+            }
+
+            .post-card {
+                padding: 18px;
+            }
+
+            .comment-form input {
+                min-width: 0;
+                width: 100%;
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+<main class="post-page">
+    <a class="back-link" th:href="@{/mvc/posts}">Назад к ленте</a>
+
+    <article class="post-card">
+        <h1 th:text="${post.title}">Название поста</h1>
+
+        <img class="post-image"
+             th:if="${post.imageUrl != null && !post.imageUrl.isBlank()}"
+             th:src="${post.imageUrl}"
+             alt="">
+
+        <div class="meta">
+            <span th:text="'Комментарии: ' + ${post.comments.size()}">Комментарии: 0</span>
+            <span th:text="'Лайки: ' + ${post.likesCount}">Лайки: 0</span>
+        </div>
+
+        <div class="tags" th:if="${!post.tags.isEmpty()}">
+            <a class="tag"
+               th:each="tag : ${post.tags}"
+               th:href="@{/mvc/posts(tag=${tag})}"
+               th:text="'#' + ${tag}">#tag</a>
+        </div>
+
+        <section class="paragraphs">
+            <p th:each="paragraph : ${post.paragraphs}" th:text="${paragraph}">
+                Абзац поста.
+            </p>
+        </section>
+
+        <div class="actions">
+            <form th:action="@{/mvc/posts/{postId}/likes(postId=${post.id})}" method="post">
+                <button type="submit">Лайк</button>
+            </form>
+
+            <button type="button">Редактировать</button>
+            <button type="button">Удалить</button>
+        </div>
+
+        <section class="comments">
+            <h2>Комментарии</h2>
+
+            <form class="comment-form"
+                  th:action="@{/mvc/posts/{postId}/comments(postId=${post.id})}"
+                  method="post">
+                <input type="text" name="text" placeholder="Комментарий" required>
+                <button type="submit">Добавить комментарий</button>
+            </form>
+
+            <div class="comment" th:each="comment : ${post.comments}">
+                <p th:text="${comment.text}">Текст комментария</p>
+                <button type="button">Редактировать</button>
+                <button type="button">Удалить</button>
+            </div>
+        </section>
+    </article>
+</main>
+</body>
+</html>

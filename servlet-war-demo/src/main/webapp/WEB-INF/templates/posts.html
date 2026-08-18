@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Лента постов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 32px;
+            color: #1f2328;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 16px;
+            align-items: end;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        select,
+        input,
+        textarea,
+        button {
+            padding: 8px 12px;
+        }
+
+        input,
+        textarea {
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .btn-primary {
+            cursor: pointer;
+            margin-bottom: 18px;
+        }
+
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(31, 35, 40, 0.42);
+            padding: 48px 20px;
+            overflow: auto;
+            z-index: 10;
+        }
+
+        .modal-backdrop.visible {
+            display: block;
+        }
+
+        .modal {
+            background: #ffffff;
+            border-radius: 6px;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 22px;
+        }
+
+        .modal h2 {
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 18px;
+        }
+
+        .feed {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .post-preview {
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 16px;
+            min-width: 0;
+        }
+
+        .post-preview h2 {
+            margin: 0 0 12px;
+            font-size: 18px;
+        }
+
+        .preview-content {
+            display: block;
+            color: inherit;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .post-image {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            max-height: 180px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+
+        .excerpt {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin: 0 0 12px;
+            line-height: 1.45;
+        }
+
+        .meta,
+        .actions,
+        .tags {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .meta {
+            margin-bottom: 10px;
+            color: #57606a;
+            font-size: 14px;
+        }
+
+        .tag {
+            border: 1px solid #d0d7de;
+            border-radius: 999px;
+            padding: 3px 8px;
+            color: #0969da;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .actions {
+            margin-top: 14px;
+        }
+
+        .comment-form {
+            margin-top: 12px;
+        }
+
+        .comment-form input {
+            min-width: 320px;
+            padding: 8px;
+        }
+
+        .pagination {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        @media (max-width: 1100px) {
+            .feed {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                margin: 18px;
+            }
+
+            .feed {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<h1>Лента постов</h1>
+
+<button class="btn-primary" type="button" onclick="togglePostForm()">Создать пост</button>
+
+<div id="postFormModal" class="modal-backdrop">
+    <div class="modal">
+        <h2>Новый пост</h2>
+
+        <form class="form-grid" th:action="@{/mvc/posts}" method="post">
+            <div>
+                <label for="title">Название поста</label>
+                <input id="title" type="text" name="title" required>
+            </div>
+
+            <div>
+                <label for="imageUrl">Картинка</label>
+                <input id="imageUrl" type="text" name="imageUrl" placeholder="https://example.com/image.jpg">
+            </div>
+
+            <div>
+                <label for="paragraph0">Первый абзац</label>
+                <textarea id="paragraph0" name="paragraphs[0]" required></textarea>
+            </div>
+
+            <div>
+                <label for="paragraph1">Второй абзац</label>
+                <textarea id="paragraph1" name="paragraphs[1]"></textarea>
+            </div>
+
+            <div>
+                <label for="paragraph2">Третий абзац</label>
+                <textarea id="paragraph2" name="paragraphs[2]"></textarea>
+            </div>
+
+            <div>
+                <label for="tag0">Тег 1</label>
+                <input id="tag0" type="text" name="tags[0]" placeholder="java">
+            </div>
+
+            <div>
+                <label for="tag1">Тег 2</label>
+                <input id="tag1" type="text" name="tags[1]" placeholder="spring">
+            </div>
+
+            <div>
+                <label for="tag2">Тег 3</label>
+                <input id="tag2" type="text" name="tags[2]" placeholder="web">
+            </div>
+
+            <div class="form-actions">
+                <button type="button" onclick="togglePostForm()">Отмена</button>
+                <button type="submit">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<form class="toolbar" th:action="@{/mvc/posts}" method="get">
+    <div>
+        <label for="tag">Тег</label>
+        <select id="tag" name="tag">
+            <option value="">Все теги</option>
+            <option th:each="tag : ${tags}"
+                    th:value="${tag}"
+                    th:text="${tag}"
+                    th:selected="${tag == selectedTag}"></option>
+        </select>
+    </div>
+
+    <div>
+        <label for="size">Постов на странице</label>
+        <select id="size" name="size">
+            <option th:each="pageSize : ${pageSizes}"
+                    th:value="${pageSize}"
+                    th:text="${pageSize}"
+                    th:selected="${pageSize == size}"></option>
+        </select>
+    </div>
+
+    <button type="submit">Показать</button>
+</form>
+
+<div class="feed">
+    <article class="post-preview" th:each="post : ${posts}">
+        <a class="preview-content" th:href="@{/mvc/posts/{postId}(postId=${post.id})}">
+            <h2 th:text="${post.title}">Название поста</h2>
+
+            <img class="post-image"
+                 th:if="${post.imageUrl != null && !post.imageUrl.isBlank()}"
+                 th:src="${post.imageUrl}"
+                 alt="">
+
+            <p class="excerpt"
+               th:text="${post.paragraphs.isEmpty() ? '' : post.paragraphs[0]}">
+                Первый абзац поста.
+            </p>
+        </a>
+
+        <div class="meta">
+            <span th:text="'Комментарии: ' + ${post.comments.size()}">Комментарии: 0</span>
+            <span th:text="'Лайки: ' + ${post.likesCount}">Лайки: 0</span>
+        </div>
+
+        <div class="tags" th:if="${!post.tags.isEmpty()}">
+            <a class="tag"
+               th:each="tag : ${post.tags}"
+               th:href="@{/mvc/posts(tag=${tag}, size=${size})}"
+               th:text="'#' + ${tag}">#tag</a>
+        </div>
+
+        <div class="actions">
+            <form th:action="@{/mvc/posts/{postId}/likes(postId=${post.id})}" method="post">
+                <button type="submit">Лайк</button>
+            </form>
+
+            <button type="button">Редактировать</button>
+            <button type="button">Удалить</button>
+        </div>
+
+        <form class="comment-form"
+              th:action="@{/mvc/posts/{postId}/comments(postId=${post.id})}"
+              method="post">
+            <input type="text" name="text" placeholder="Комментарий" required>
+            <button type="submit">Добавить комментарий</button>
+        </form>
+    </article>
+</div>
+
+<div class="pagination">
+    <a th:if="${page > 0}"
+       th:href="@{/mvc/posts(page=${page - 1}, size=${size}, tag=${selectedTag})}">Назад</a>
+
+    <span th:text="'Страница ' + ${page + 1} + ' из ' + ${totalPages == 0 ? 1 : totalPages}">
+        Страница 1 из 1
+    </span>
+
+    <a th:if="${page + 1 < totalPages}"
+       th:href="@{/mvc/posts(page=${page + 1}, size=${size}, tag=${selectedTag})}">Вперед</a>
+</div>
+<script>
+    function togglePostForm() {
+        document.getElementById("postFormModal").classList.toggle("visible");
+    }
+</script>
+</body>
+</html>

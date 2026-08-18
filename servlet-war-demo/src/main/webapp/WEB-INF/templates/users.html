@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Пользователи</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 32px;
+        }
+
+        table {
+            border-collapse: collapse;
+            min-width: 720px;
+        }
+
+        th,
+        td {
+            border: 1px solid #d0d7de;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #f6f8fa;
+        }
+
+        .actions button {
+            cursor: pointer;
+        }
+
+        .btn-add {
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .user-form {
+            display: none;
+            margin-bottom: 24px;
+        }
+
+        .user-form.visible {
+            display: block;
+        }
+
+        .form-row {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: inline-block;
+            min-width: 90px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            padding: 6px 8px;
+        }
+    </style>
+</head>
+<body>
+<h1>Пользователи</h1>
+
+<button class="btn-add" onclick="toggleForm()">Добавить пользователя</button>
+
+<form id="userForm" class="user-form" th:action="@{/mvc/users}" th:object="${user}" method="post">
+    <div class="form-row">
+        <label for="firstName">Имя</label>
+        <input id="firstName" type="text" th:field="*{firstName}" required>
+    </div>
+
+    <div class="form-row">
+        <label for="lastName">Фамилия</label>
+        <input id="lastName" type="text" th:field="*{lastName}" required>
+    </div>
+
+    <div class="form-row">
+        <label for="age">Возраст</label>
+        <input id="age" type="number" th:field="*{age}" min="0" required>
+    </div>
+
+    <div class="form-row">
+        <label for="active">Активен</label>
+        <input id="active" type="checkbox" th:field="*{active}">
+    </div>
+
+    <button type="submit">Сохранить</button>
+</form>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Имя</th>
+        <th>Фамилия</th>
+        <th>Возраст</th>
+        <th>Активен</th>
+        <th>Действия</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.firstName}"></td>
+        <td th:text="${user.lastName}"></td>
+        <td th:text="${user.age}"></td>
+        <td th:text="${user.active ? 'Да' : 'Нет'}"></td>
+        <td>
+            <form th:action="@{/mvc/users/{id}(id=${user.id})}" method="post" style="display:inline;">
+                <input type="hidden" name="_method" value="delete">
+                <button type="submit">Удалить</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script>
+    function toggleForm() {
+        document.getElementById("userForm").classList.toggle("visible");
+    }
+</script>
+</body>
+</html>
